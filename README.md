@@ -1,3 +1,5 @@
+
+![Alt text](streaming_telemetry.png?raw=true "PowerPlant Telemetry")
 # Prerequisites
 
 ## Events and Telemetry Websockets
