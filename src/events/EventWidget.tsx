@@ -15,8 +15,9 @@ interface EventWidgetState {
 }
 
 class Event {
-  time: string;
-  event: string;
+  newState: string;
+  oldState: string;
+  timeStamp: string;
 }
 
 class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
@@ -55,15 +56,17 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
             <TableHead>
               <TableRow>
                 <TableCell>Time</TableCell>
-                <TableCell>Event</TableCell>
+                <TableCell>Old State</TableCell>
+                <TableCell>New State</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((n, index) => {
                 return (
                   <TableRow key={index}>
-                    <TableCell>{moment(n.time).format()}</TableCell>
-                    <TableCell>{n.event}</TableCell>
+                    <TableCell>{moment(n.timeStamp).format()}</TableCell>
+                    <TableCell>{n.oldState}</TableCell>
+                    <TableCell>{n.newState}</TableCell>
                   </TableRow>
                 );
               })}

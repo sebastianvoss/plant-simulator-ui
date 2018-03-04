@@ -26,7 +26,7 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      this.chart.series[0].addPoint([message.time, message.value], true, true);
+      this.chart.series[0].addPoint([message.time, message.activePower], true, true);
     };
   }
 
