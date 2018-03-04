@@ -32,6 +32,9 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
   componentDidMount() {
     const ws = new WebSocket(Utils.eventsUri(this.props.id));
+    const heartbeat = {
+      heartbeat: true
+    };
 
     ws.onmessage = (e) => {
       const event = JSON.parse(e.data) as Event;
@@ -42,6 +45,8 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
         return {data};
       });
     };
+
+    setInterval(() => ws.send(JSON.stringify(heartbeat)), 10000);
   }
 
   render() {
