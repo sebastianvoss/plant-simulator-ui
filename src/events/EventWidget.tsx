@@ -33,13 +33,13 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
   componentDidMount() {
     const ws = new WebSocket(Utils.eventsUri(this.props.id));
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
+    ws.onmessage = (e) => {
+      const event = JSON.parse(e.data) as Event;
       this.setState((prevState: EventWidgetState) => {
-        prevState.data.push(message);
+        prevState.data.push(event);
         const start = Math.max(0, prevState.data.length - this.props.numValues);
-        const d = prevState.data.slice(start, prevState.data.length);
-        return {data: d};
+        const data = prevState.data.slice(start, prevState.data.length);
+        return {data};
       });
     };
   }
