@@ -17,20 +17,23 @@ interface TelemetryWidgetState {
 
 class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWidgetState> {
   private chart: any;
+  private ws: WebSocket;
 
   constructor(props: TelemetryWidgetProps) {
     super(props);
   }
 
   componentDidMount() {
-    const ws = new WebSocket(Utils.telemetryUri(this.props.id));
+    this.ws = this.connect(this.props.id);
+  }
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      const time = moment(message.timestamp).toDate().getTime();
-      const value = message.activePower;
-      this.chart.series[0].addPoint([time, value], true, true);
-    };
+  componentWillReceiveProps(props: TelemetryWidgetProps) {
+    this.ws.close();
+    this.ws = this.connect(props.id);
+  }
+
+  componentWillUnmount() {
+    this.ws.close();
   }
 
   render() {
@@ -87,6 +90,19 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
         />
       </Paper>
     );
+  }
+
+  private connect = (id: string) => {
+    const ws = new WebSocket(Utils.telemetryUri(id));
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const time = moment(message.timestamp).toDate().getTime();
+      const value = message.activePower;
+      this.chart.series[0].addPoint([time, value], true, true);
+    };
+
+    return ws;
   }
 
 }
