@@ -9,6 +9,8 @@ const logo = require('./logo.svg');
 class App extends React.Component {
 
   render() {
+    const id = '2';
+
     return (
       <div className="App">
         <header className="App-header">
@@ -18,10 +20,10 @@ class App extends React.Component {
         <div style={{margin: '20px'}}>
           <Grid container={true} spacing={24}>
             <Grid item={true} xs={12} sm={6}>
-              <TelemetryWidget id={'1'} numValues={20} minValue={0} maxValue={100}/>
+              <TelemetryWidget id={id} numValues={20} minValue={0} maxValue={900}/>
             </Grid>
             <Grid item={true} xs={12} sm={6}>
-              <EventWidget id={'1'} numValues={5}/>
+              <EventWidget id={id} numValues={5}/>
             </Grid>
           </Grid>
         </div>

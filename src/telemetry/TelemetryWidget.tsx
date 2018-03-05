@@ -3,6 +3,7 @@ import Paper from 'material-ui/Paper';
 import * as ReactHighcharts from 'react-highcharts';
 import Typography from 'material-ui/Typography';
 import Utils from '../common/Utils';
+import * as moment from 'moment';
 
 interface TelemetryWidgetProps {
   id: string;
@@ -26,9 +27,8 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      // const time = message.time;
-      const time = new Date().getTime();
-      const value = parseFloat(message.activePower);
+      const time = moment(message.timestamp).toDate().getTime();
+      const value = message.activePower;
       this.chart.series[0].addPoint([time, value], true, true);
     };
   }
