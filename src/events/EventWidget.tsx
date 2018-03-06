@@ -35,13 +35,15 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
   componentDidMount() {
     this.ws = this.connect(this.props.id);
-    this.timer = this.setupHeartbeat(this.ws);
   }
 
   componentWillReceiveProps(props: EventWidgetProps) {
+    this.setState({
+      data: []
+    });
+    clearInterval(this.timer);
     this.ws.close();
     this.ws = this.connect(props.id);
-    this.timer = this.setupHeartbeat(this.ws);
   }
 
   componentWillUnmount() {
@@ -84,6 +86,15 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
   private connect = (id: string) => {
     const ws = new WebSocket(Utils.eventsUri(id));
 
+    ws.onopen = (e) => {
+      console.log('onopen');
+      this.timer = setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000);
+    };
+
+    ws.onerror = (e) => {
+      console.log('onerror');
+    };
+
     ws.onmessage = (e) => {
       const event = JSON.parse(e.data) as Event;
       this.setState((prevState: EventWidgetState) => {
@@ -96,9 +107,6 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
     return ws;
   }
-
-  private setupHeartbeat = (ws: WebSocket) =>
-    setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000)
 
 }
 
