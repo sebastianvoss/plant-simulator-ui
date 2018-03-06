@@ -3,56 +3,20 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import * as moment from 'moment';
-import Utils from '../common/Utils';
+import PowerPlantEvent from '../common/PowerPlantEvent';
 
 interface EventWidgetProps {
   id: string;
-  numValues: number;
+  events: PowerPlantEvent[];
 }
 
 interface EventWidgetState {
-  data: Event[];
-}
-
-class Event {
-  newState: string;
-  oldState: string;
-  timeStamp: string;
 }
 
 class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
-  private ws: WebSocket;
-  private timer: NodeJS.Timer;
-
-  constructor(props: EventWidgetProps) {
-    super(props);
-
-    this.state = {
-      data: []
-    };
-  }
-
-  componentDidMount() {
-    this.ws = this.connect(this.props.id);
-  }
-
-  componentWillReceiveProps(props: EventWidgetProps) {
-    this.setState({
-      data: []
-    });
-    clearInterval(this.timer);
-    this.ws.close();
-    this.ws = this.connect(props.id);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer);
-    this.ws.close();
-  }
-
   render() {
-    const {data} = this.state;
+    const {events} = this.props;
 
     return (
         <Paper>
@@ -68,7 +32,7 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((n, index) => {
+              {events.map((n, index) => {
                 return (
                   <TableRow key={index}>
                     <TableCell>{moment(n.timeStamp).format()}</TableCell>
@@ -81,33 +45,6 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
           </Table>
         </Paper>
     );
-  }
-
-  private connect = (id: string) => {
-    const ws = new WebSocket(Utils.eventsUri(id));
-
-    ws.onopen = (e) => {
-      console.log('onopen');
-      this.timer = setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000);
-    };
-
-    ws.onerror = (e) => {
-      console.log('onerror');
-    };
-
-    ws.onmessage = (e) => {
-      const event = JSON.parse(e.data) as Event;
-      if (event.newState !== undefined) {
-        this.setState((prevState: EventWidgetState) => {
-            prevState.data.push(event);
-            const start = Math.max(0, prevState.data.length - this.props.numValues);
-            const data = prevState.data.slice(start, prevState.data.length);
-            return {data};
-        });
-      }
-    };
-
-    return ws;
   }
 
 }
