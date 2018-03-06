@@ -86,12 +86,14 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
     ws.onmessage = (e) => {
       const event = JSON.parse(e.data) as Event;
-      this.setState((prevState: EventWidgetState) => {
-        prevState.data.push(event);
-        const start = Math.max(0, prevState.data.length - this.props.numValues);
-        const data = prevState.data.slice(start, prevState.data.length);
-        return {data};
-      });
+      if (event.newState !== undefined) {
+        this.setState((prevState: EventWidgetState) => {
+            prevState.data.push(event);
+            const start = Math.max(0, prevState.data.length - this.props.numValues);
+            const data = prevState.data.slice(start, prevState.data.length);
+            return {data};
+        });
+      }
     };
 
     return ws;
