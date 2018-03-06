@@ -83,12 +83,14 @@ class AlertWidget extends React.Component<AlertWidgetProps, AlertWidgetState> {
 
     ws.onmessage = (e) => {
       const alert = JSON.parse(e.data) as Alert;
-      this.setState((prevState: AlertWidgetState) => {
-        prevState.data.push(alert);
-        const start = Math.max(0, prevState.data.length - this.props.numValues);
-        const data = prevState.data.slice(start, prevState.data.length);
-        return {data};
-      });
+      if (alert.message !== '') {
+          this.setState((prevState: AlertWidgetState) => {
+              prevState.data.push(alert);
+              const start = Math.max(0, prevState.data.length - this.props.numValues);
+              const data = prevState.data.slice(start, prevState.data.length);
+              return {data};
+          });
+      }
     };
 
     return ws;
