@@ -5,6 +5,7 @@ import PlantSelector from './plantSelector/PlantSelector';
 import Grid from 'material-ui/Grid';
 import './App.css';
 import Plant from './common/Plant';
+import AlertWidget from './events/AlertWidget';
 
 const logo = require('./logo.svg');
 
@@ -53,6 +54,9 @@ class App extends React.Component<any, AppState> {
             <Grid item={true} xs={12} sm={6}>
               <TelemetryWidget id={selectedPlantId} numValues={20} minValue={0} maxValue={900}/>
             </Grid>
+              <Grid item={true} xs={12} sm={6}>
+                  <AlertWidget id={selectedPlantId} numValues={5}/>
+              </Grid>
           </Grid>
         </div>
       </div>

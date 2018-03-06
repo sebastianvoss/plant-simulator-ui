@@ -5,27 +5,26 @@ import Typography from 'material-ui/Typography';
 import * as moment from 'moment';
 import Utils from '../common/Utils';
 
-interface EventWidgetProps {
+interface AlertWidgetProps {
   id: string;
   numValues: number;
 }
 
-interface EventWidgetState {
-  data: Event[];
+interface AlertWidgetState {
+  data: Alert[];
 }
 
-class Event {
-  newState: string;
-  oldState: string;
+class Alert {
+  message: string;
   timeStamp: string;
 }
 
-class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
+class AlertWidget extends React.Component<AlertWidgetProps, AlertWidgetState> {
 
   private ws: WebSocket;
   private timer: NodeJS.Timer;
 
-  constructor(props: EventWidgetProps) {
+  constructor(props: AlertWidgetProps) {
     super(props);
 
     this.state = {
@@ -35,15 +34,13 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
 
   componentDidMount() {
     this.ws = this.connect(this.props.id);
+    this.timer = this.setupHeartbeat(this.ws);
   }
 
-  componentWillReceiveProps(props: EventWidgetProps) {
-    this.setState({
-      data: []
-    });
-    clearInterval(this.timer);
+  componentWillReceiveProps(props: AlertWidgetProps) {
     this.ws.close();
     this.ws = this.connect(props.id);
+    this.timer = this.setupHeartbeat(this.ws);
   }
 
   componentWillUnmount() {
@@ -57,14 +54,13 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
     return (
         <Paper>
           <Typography variant="headline" component="h3">
-            Events (Power Plant {this.props.id})
+            Alerts (Power Plant {this.props.id})
           </Typography>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Time</TableCell>
-                <TableCell>Old State</TableCell>
-                <TableCell>New State</TableCell>
+                <TableCell>Message</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -72,8 +68,7 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
                 return (
                   <TableRow key={index}>
                     <TableCell>{moment(n.timeStamp).format()}</TableCell>
-                    <TableCell>{n.oldState}</TableCell>
-                    <TableCell>{n.newState}</TableCell>
+                    <TableCell>{n.message}</TableCell>
                   </TableRow>
                 );
               })}
@@ -86,30 +81,24 @@ class EventWidget extends React.Component<EventWidgetProps, EventWidgetState> {
   private connect = (id: string) => {
     const ws = new WebSocket(Utils.eventsUri(id));
 
-    ws.onopen = (e) => {
-      console.log('onopen');
-      this.timer = setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000);
-    };
-
-    ws.onerror = (e) => {
-      console.log('onerror');
-    };
-
     ws.onmessage = (e) => {
-      const event = JSON.parse(e.data) as Event;
-      if (event.newState !== undefined) {
-        this.setState((prevState: EventWidgetState) => {
-            prevState.data.push(event);
-            const start = Math.max(0, prevState.data.length - this.props.numValues);
-            const data = prevState.data.slice(start, prevState.data.length);
-            return {data};
-        });
+      const alert = JSON.parse(e.data) as Alert;
+      if (alert.message !== undefined) {
+          this.setState((prevState: AlertWidgetState) => {
+              prevState.data.push(alert);
+              const start = Math.max(0, prevState.data.length - this.props.numValues);
+              const data = prevState.data.slice(start, prevState.data.length);
+              return {data};
+          });
       }
     };
 
     return ws;
   }
 
+  private setupHeartbeat = (ws: WebSocket) =>
+    setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000)
+
 }
 
-export default EventWidget;
+export default AlertWidget;
