@@ -55,7 +55,7 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       },
       series: [
         {
-          name: 'Data',
+          name: 'activePower',
           type: 'spline',
           data: (function () {
             // generate an array of random data
@@ -72,7 +72,10 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
         }
       ],
       legend: {
-        enabled: false
+        title: 'activePower',
+        align: 'right',
+        verticalAlign: 'top',
+        layout: 'vertical'
       },
       exporting: {
         enabled: false
