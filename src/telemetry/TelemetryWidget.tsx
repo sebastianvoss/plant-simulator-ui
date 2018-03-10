@@ -48,7 +48,7 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       },
       yAxis: {
         title: {
-          text: 'Value'
+          text: 'Power'
         },
         min: minValue,
         max: maxValue
