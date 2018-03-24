@@ -8,7 +8,7 @@ import Plant from './common/Plant';
 import AlertWidget from './events/AlertWidget';
 import Utils from './common/Utils';
 import PowerPlantEvent from './common/PowerPlantEvent';
-import PowerPlantAlert from './common/Alert';
+import PowerPlantAlert from './common/PowerPlantAlert';
 
 const logo = require('./logo.svg');
 
@@ -64,14 +64,14 @@ class App extends React.Component<any, AppState> {
         </header>
         <div style={{margin: '20px'}}>
           <Grid container={true} spacing={24}>
-            <Grid item={true} xs={12} sm={6}>
+            <Grid item={true} xs={12} sm={2}>
               <PlantSelector plants={plants} selectedPlantId={selectedPlantId} onChange={this.onChange}/>
+            </Grid>
+            <Grid item={true} xs={12} sm={10}>
+              <TelemetryWidget id={selectedPlantId} numValues={20} minValue={0} maxValue={900}/>
             </Grid>
             <Grid item={true} xs={12} sm={6}>
               <EventWidget id={selectedPlantId} events={events}/>
-            </Grid>
-            <Grid item={true} xs={12} sm={6}>
-              <TelemetryWidget id={selectedPlantId} numValues={20} minValue={0} maxValue={900}/>
             </Grid>
             <Grid item={true} xs={12} sm={6}>
               <AlertWidget id={selectedPlantId} alerts={alerts}/>
@@ -85,6 +85,7 @@ class App extends React.Component<any, AppState> {
   onChange = (event: React.FormEvent<HTMLSelectElement>) => {
     const plantId = event.currentTarget.value;
     this.setState((prevState: AppState) => {
+      clearInterval(this.eventWebsocketHeartbeatTimer);
       this.eventWebsocket.close();
       this.eventWebsocket = this.connectEventWebsocket(plantId);
 
@@ -101,7 +102,10 @@ class App extends React.Component<any, AppState> {
 
     ws.onopen = (e) => {
       console.log('onopen');
-      this.eventWebsocketHeartbeatTimer = setInterval(() => ws.send(JSON.stringify({heartbeat: true})), 10000);
+      this.eventWebsocketHeartbeatTimer = setInterval(
+        () => ws.send(JSON.stringify({heartbeat: true})),
+        10000
+      );
     };
 
     ws.onerror = (e) => {

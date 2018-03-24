@@ -1,9 +1,9 @@
 import * as React from 'react';
-import Paper from 'material-ui/Paper';
 import * as ReactHighcharts from 'react-highcharts';
 import Typography from 'material-ui/Typography';
 import Utils from '../common/Utils';
 import * as moment from 'moment';
+import { PowerPlantTelemetry, Measurement } from '../common/PowerPlantTelemetry';
 
 interface TelemetryWidgetProps {
   id: string;
@@ -13,6 +13,8 @@ interface TelemetryWidgetProps {
 }
 
 interface TelemetryWidgetState {
+  telemetry: PowerPlantTelemetry;
+  config: any;
 }
 
 class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWidgetState> {
@@ -21,6 +23,11 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
 
   constructor(props: TelemetryWidgetProps) {
     super(props);
+    const telemetry = this.generateEmptyTelemetry();
+    this.state = {
+      telemetry,
+      config: this.createConfig(telemetry)
+    };
   }
 
   componentDidMount() {
@@ -28,8 +35,17 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
   }
 
   componentWillReceiveProps(props: TelemetryWidgetProps) {
-    this.ws.close();
-    this.ws = this.connect(props.id);
+    if (this.props.id !== props.id) {
+      this.setState(prevState => {
+        this.ws.close();
+        this.ws = this.connect(props.id);
+        const telemetry = this.generateEmptyTelemetry();
+        return {
+          telemetry,
+          config: this.createConfig(telemetry)
+        };
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -37,58 +53,19 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
   }
 
   render() {
-    const {numValues, minValue, maxValue} = this.props;
-    const config = {
-      title: {
-        text: ''
-      },
-      xAxis: {
-        type: 'datetime',
-        tickPixelInterval: 150
-      },
-      yAxis: {
-        title: {
-          text: 'Value'
-        },
-        min: minValue,
-        max: maxValue
-      },
-      series: [
-        {
-          name: 'Data',
-          type: 'spline',
-          data: (function () {
-            // generate an array of random data
-            let data: any[] = [], time = (new Date()).getTime(), i;
-
-            for (i = -numValues; i < 0; i += 1) {
-              data.push({
-                x: time + i * 2500,
-                y: 0
-              });
-            }
-            return data;
-          }())
-        }
-      ],
-      legend: {
-        enabled: false
-      },
-      exporting: {
-        enabled: false
-      },
-    };
+    const {config} = this.state;
 
     return (
-      <Paper>
+      <div>
         <Typography variant="headline" component="h3">
           Telemetry (Power Plant {this.props.id})
         </Typography>
         <ReactHighcharts
+          isPureConfig={true}
           config={config}
           callback={chart => this.chart = chart}
         />
-      </Paper>
+      </div>
     );
   }
 
@@ -96,13 +73,75 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
     const ws = new WebSocket(Utils.telemetryUri(id));
 
     ws.onmessage = (event) => {
+      console.log(event.data);
       const message = JSON.parse(event.data);
-      const time = moment(message.timestamp).toDate().getTime();
+      const date = moment(message.timestamp).toDate();
       const value = message.activePower;
-      this.chart.series[0].addPoint([time, value], true, true);
+      const setPoint = message.setPoint;
+
+      this.setState(prevState => {
+        prevState.telemetry.measurements.push({time: date, activePower: value, setPoint});
+        const start = Math.max(0, this.state.telemetry.measurements.length - this.props.numValues);
+        const measurements = prevState.telemetry.measurements.slice(
+          start,
+          prevState.telemetry.measurements.length
+        );
+
+        this.chart.series[0].addPoint([date.getTime(), value], true, true);
+        this.chart.series[1].addPoint([date.getTime(), setPoint], true, true);
+
+        return {telemetry: {measurements}};
+      });
     };
 
     return ws;
+  }
+
+  private generateEmptyTelemetry = (): PowerPlantTelemetry => {
+    let measurements: Measurement[] = [], time = (new Date()).getTime(), i;
+
+    for (i = -this.props.numValues; i < 0; i += 1) {
+      measurements.push({
+        time: new Date(time + i * 2500),
+        activePower: 0
+      });
+    }
+    return {measurements};
+  }
+
+  private createConfig = (telemetry: PowerPlantTelemetry) => {
+    const activePower = telemetry.measurements.map(m => [m.time.getTime(), m.activePower]);
+    const setPoints = telemetry.measurements.map(m => [m.time.getTime(), m.setPoint]);
+    return {
+      chart : {
+        type: 'spline',
+      },
+      title: {
+        text: ''
+      },
+      xAxis: {
+        type: 'datetime',
+      },
+      yAxis: {
+        title: {
+          text: ''
+        }
+      },
+      series: [
+        {
+          name: 'Data',
+          data: activePower
+        },
+        {
+          name: 'SetPoint',
+          data: setPoints,
+          step: 'left'
+        }
+      ],
+      legend: {
+        enabled: true
+      }
+    };
   }
 
 }

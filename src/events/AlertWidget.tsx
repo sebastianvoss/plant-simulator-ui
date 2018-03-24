@@ -3,7 +3,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import * as moment from 'moment';
-import PowerPlantAlert from '../common/Alert';
+import PowerPlantAlert from '../common/PowerPlantAlert';
 
 interface AlertWidgetProps {
   id: string;
