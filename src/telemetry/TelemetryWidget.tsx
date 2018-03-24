@@ -87,8 +87,8 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
           prevState.telemetry.measurements.length
         );
 
-        this.chart.series[0].addPoint([date.getTime(), value], true, false, true);
-        this.chart.series[1].addPoint([date.getTime(), setPoint], true, false, true);
+        this.chart.series[0].addPoint([date.getTime(), value], true, true);
+        this.chart.series[1].addPoint([date.getTime(), setPoint], true, true);
 
         return {telemetry: {measurements}};
       });
