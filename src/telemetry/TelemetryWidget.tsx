@@ -124,12 +124,12 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       },
       yAxis: {
         title: {
-          text: ''
+          text: 'Power'
         }
       },
       series: [
         {
-          name: 'Data',
+          name: 'ActivePower',
           data: activePower
         },
         {
@@ -139,7 +139,10 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
         }
       ],
       legend: {
-        enabled: true
+        title: 'activePower',
+        align: 'right',
+        verticalAlign: 'top',
+        layout: 'vertical'
       }
     };
   }
