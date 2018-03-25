@@ -130,12 +130,14 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       series: [
         {
           name: 'ActivePower',
-          data: activePower
+          data: activePower,
+          color: '#FF0000'
         },
         {
           name: 'SetPoint',
           data: setPoints,
-          step: 'left'
+          step: 'left',
+          color: '#15faff'
         }
       ],
       legend: {
