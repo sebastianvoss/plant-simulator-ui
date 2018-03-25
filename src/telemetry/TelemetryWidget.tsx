@@ -116,6 +116,9 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       chart : {
         type: 'spline',
       },
+      credits: {
+          enabled: false
+      },
       title: {
         text: ''
       },
@@ -124,7 +127,7 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
       },
       yAxis: {
         title: {
-          text: 'Power'
+          text: 'Power (kw)'
         }
       },
       series: [
