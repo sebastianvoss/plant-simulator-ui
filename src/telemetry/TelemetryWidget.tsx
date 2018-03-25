@@ -142,7 +142,7 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
           name: 'SetPoint',
           data: setPoints,
           step: 'left',
-          color: '#15faff'
+          color: '#14ff16'
         }
       ],
       legend: {
