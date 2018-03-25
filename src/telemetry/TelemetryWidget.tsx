@@ -114,6 +114,8 @@ class TelemetryWidget extends React.Component<TelemetryWidgetProps, TelemetryWid
     const setPoints = telemetry.measurements.map(m => [m.time.getTime(), m.setPoint]);
     return {
       chart : {
+        borderColor: '#ebe9e7',
+        borderWidth: 2,
         type: 'spline',
       },
       credits: {
